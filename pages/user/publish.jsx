@@ -1,11 +1,19 @@
-import { Button, Container, Select, TextField, Typography } from '@material-ui/core';
+import {useState} from 'react';
+import {
+  Button, Container, IconButton, Select, TextField, Typography,
+  Box,
+} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { Box } from '@mui/system';
+import {useDropzone} from 'react-dropzone'
+import { DeleteForever } from '@material-ui/icons';
+
 import TemplateDefault from '../../src/templates/Default';
 
 const useStyles = makeStyles((theme) => ({
+  mask: {},
+  mainImage: {},
   container: {
-    padding: theme.spacing(8,0,6),
+    padding: theme.spacing(8, 0, 6),
   },
   boxContainer: {
     paddingBottom: theme.spacing(3),
@@ -14,12 +22,77 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.white,
     padding: theme.spacing(3),
     borderRadius: theme.spacing(1),
-    boxShadow: '1px 1px 10px rgba(0,0,0,0.5)'
-  }
-}))
+    boxShadow: '1px 1px 10px rgba(0,0,0,0.5)',
+  },
+  thumbsContainer: {
+    display: 'flex',
+    marginTop: 15,
+    flexWrap: 'wrap',
+  },
+  dropzone: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center',
+    width: 200,
+    height: 150,
+    margin: '0 15px 15px 0',
+    backgroundColor: theme.palette.background.default,
+    border: '2px dashed black',
+  },
+  thumb: {
+    width: 200,
+    height: 150,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center center',
+    position: 'relative',
+    margin: '0 15px 15px 0',
+
+    '& $mainImage': {
+      backgroundColor: '#125512',
+      padding: '6px 10px',
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+    },
+
+    '&:hover $mask': {
+      display: 'flex',
+    },
+
+    '& $mask': {
+      backgroundColor: 'rgba(0,0,0,0.7)',
+      height: '100%',
+      display: 'none',
+      justifyContent: 'center',
+      alignItems: 'center',
+      textAlign: 'center',
+    },
+  },
+}));
 
 const Publish = () => {
   const classes = useStyles();
+  const [files, setFiles] = useState([]); 
+
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: 'image/*',
+    onDrop: (acceptedFile) => {
+      const newFiles = acceptedFile.map(file => {
+        return Object.assign(file, {
+          preview: URL.createObjectURL(file)
+        })
+      })
+     setFiles([...files, ...newFiles]);
+    }
+  })
+
+  const handleRemoveFile = fileName => {
+    const newFileState = files.filter(file => file.name !== fileName);
+    console.log(fileName);
+    setFiles(newFileState);
+  }
+
   return (
     <TemplateDefault>
       <Container maxWidth="md" className={classes.container}>
@@ -32,16 +105,17 @@ const Publish = () => {
       </Container>
 
       <Container maxWidth="md" className={classes.boxContainer}>
-        <Box className={classes.box}> 
+        <Box className={classes.box}>
           <Typography component="h6" variant="h6" color="textPrimary">
             Título do Anúncio
           </Typography>
-          <TextField 
+          <TextField
             label="ex.: Enfermeiro assistêncial"
             size="small"
             fullWidth
           />
-          <br /><br />
+          <br />
+          <br />
           <Typography component="h6" variant="h6" color="textPrimary">
             Categoria
           </Typography>
@@ -71,6 +145,41 @@ const Publish = () => {
           <Typography component="div" variant="body2" color="textPrimary">
             A primeira imagem é a foto principal do seu atendimento
           </Typography>
+          <Box className={classes.thumbsContainer}>
+            <Box className={classes.dropzone} {...getRootProps()}>
+              <input {...getInputProps()}/>
+              <Typography variant="body2" color="textPrimary">
+                Clique para adicionar ou arraste a imagem para aqui.
+              </Typography>
+            </Box>
+
+            {
+              files.map((file, index) => (
+                  <Box
+                    key={file.name}
+                    className={classes.thumb}
+                    style={{ backgroundImage: `url(${file.preview})` }}
+                  >
+                    {
+                      index === 0 ?
+                        <Box className={classes.mainImage}>
+                          <Typography variant="body" color="secondary">
+                            Principal
+                          </Typography>
+                        </Box>
+                        : null
+                    }
+                    <Box className={classes.mask}>
+                      <IconButton color="secondary" onClick={() => handleRemoveFile(file.name)}>
+                        <DeleteForever fontSize="medium" />
+                      </IconButton>
+                    </Box>
+                  </Box>
+              ))
+            }
+
+
+          </Box>
         </Box>
       </Container>
 
@@ -82,7 +191,7 @@ const Publish = () => {
           <Typography component="div" variant="body2" color="textPrimary">
             Escreva os detalhes
           </Typography>
-          <TextField 
+          <TextField
             multiline
             rows={6}
             variant="outlined"
@@ -97,26 +206,29 @@ const Publish = () => {
             Dados de Contato
           </Typography>
           <TextField
-            label="Nome" 
+            label="Nome"
             variant="outlined"
             size="small"
             fullWidth
           />
-          <br /><br />
+          <br />
+          <br />
           <TextField
-            label="E-mail" 
+            label="E-mail"
             variant="outlined"
             size="small"
             fullWidth
           />
-          <br /><br />
+          <br />
+          <br />
           <TextField
-            label="Telefone" 
+            label="Telefone"
             variant="outlined"
             size="small"
             fullWidth
           />
-          <br /><br />
+          <br />
+          <br />
         </Box>
       </Container>
 
@@ -127,7 +239,7 @@ const Publish = () => {
 
       </Container>
     </TemplateDefault>
-  )
-}
+  );
+};
 
 export default Publish;
