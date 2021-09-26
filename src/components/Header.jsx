@@ -1,12 +1,22 @@
-import * as React from 'react';
-import AppBar from '@material-ui/core/AppBar'
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
+import {useState} from 'react';
+import Link from 'next/link'
+import { 
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  IconButton,
+  Container,
+  Avatar,
+  Menu,
+  MenuItem,
+  Divider,
+ } from '@material-ui/core'
+
 import MenuIcon from '@material-ui/icons/Menu';
 
 import { makeStyles } from '@material-ui/core/styles';
+import { AccountCircle } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
  root: {
@@ -18,30 +28,63 @@ const useStyles = makeStyles((theme) => ({
  title: {
    flexGrow: 1,
  },
+ userName: {
+   marginLeft: 6,
+ },
+ divider: {
+   margin: '8px 0',
+ },
 }));
 
 export default function Header() {
   const classes = useStyles();
+  const [anchorUserMenu, setAnchorUserMenu] = useState(false)
 
+  const openUserMenu = Boolean(anchorUserMenu);
+  
   return (
-    <div className={classes.root}>
-        <AppBar position="static">
-          <Toolbar>
-            <IconButton
-              size="medium"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              className={classes.menuButton}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" className={classes.title}>
-              Enfs - Encontre um enfermeiro(a)
-            </Typography>
-            <Button color="inherit">Login</Button>
-          </Toolbar>
+    <>
+        <AppBar position="static" elevation={3}>
+          <Container maxWidth="lg">
+            <Toolbar>
+              <Typography variant="h6" className={classes.title}>
+                Enfs
+              </Typography>
+              <Link href="/user/publish">
+                <Button color="inherit" variant="outlined">Login</Button>
+              </Link>
+              <IconButton color="secondary" onClick={(e) => setAnchorUserMenu(e.currentTarget)}>
+                {
+                  true == true
+                  ? <Avatar src="https://source.unsplash.com/random" />
+                  : <AccountCircle />  
+                }
+                <Typography variant="subtitle2" color="secondary" className={classes.userName}>
+                  Carlos Junior
+                </Typography>
+              </IconButton>
+
+              <Menu 
+                anchorEl={anchorUserMenu}
+                open={openUserMenu}
+                onClose={() => setAnchorUserMenu(null)}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+              >
+                <Link href="/user/dashboard">
+                  <MenuItem>Meus pedidos</MenuItem>
+                </Link>
+                <Link href="/user/publish">
+                  <MenuItem>Publicar novo pedido</MenuItem>
+                </Link>
+                <Divider className={classes.divider}/>
+                <MenuItem>Sair</MenuItem>
+              </Menu>
+            </Toolbar>
+          </Container>
         </AppBar>
-    </div>
+    </>
   );
 }
